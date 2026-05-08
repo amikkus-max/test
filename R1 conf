@@ -12,10 +12,10 @@ config-register 0x2102
 ! Põhiseadistus
 
 no ip domain-lookup
-enable secret password
+enable secret <password> !muuda
 service password-encryption
 line con 0
-password password
+password <password> !muuda
 login
 
 ! Määrame WAN IP:
@@ -71,7 +71,7 @@ ip helper-address 172.17.30.6
 ! Avame SSH liinile vty 0 4, teeme kasutaja, crypto key 2048
 
 ip domain-name suvelaager.hkhk.edu.ee
-username Suvelaager secret password
+username Suvelaager secret <password> !muuda
 crypto key generate rsa modulus 2048
 ip ssh version 2
 ip ssh time-out 60
