@@ -1,0 +1,108 @@
+! Ruuteri seadistused
+
+! WAN port - GigabitEthernet0/1
+! LAN port - GigabitEthernet0/0
+
+! Muudame hostname:
+conf t
+hostname R1
+
+config-register 0x2102
+
+! Põhiseadistus
+
+no ip domain-lookup
+enable secret Passw0rd4795
+service password-encryption
+line con 0
+password Passw0rd4795
+login
+
+! Määrame WAN IP:
+
+interface GigabitEthernet0/1
+ip address 192.168.30.200 255.255.255.0
+ip nat outside
+no shutdown
+
+! Teeme ruutingu
+
+ip route 0.0.0.0 0.0.0.0 192.168.30.1
+
+! Teeme ACL NAT jaoks, hetkel 172.17.0.0 jaoks
+
+access-list 1 permit 172.17.0.0 0.0.255.255
+ip nat inside source list 1 interface GigabitEthernet0/1 overload
+
+! Seadistame VLAN’id vastavalt tabelile GigabitEthernet0/0 pordile:
+
+interface  GigabitEthernet0/0
+no shutdown
+
+interface GigabitEthernet0/0.1
+encapsulation dot1Q 1
+ip address 172.17.1.1 255.255.255.240
+ip nat inside
+
+interface GigabitEthernet0/0.10
+encapsulation dot1Q 10
+ip address 172.17.10.1 255.255.255.240
+ip nat inside
+ip helper-address 172.17.30.5
+ip helper-address 172.17.30.6
+
+interface GigabitEthernet0/0.30
+encapsulation dot1Q 30
+ip address 172.17.30.1 255.255.255.240
+ip nat inside
+
+interface GigabitEthernet0/0.100
+encapsulation dot1Q 100
+ip address 172.17.100.1 255.255.255.240
+ip nat inside
+
+interface GigabitEthernet0/0.200
+encapsulation dot1Q 200
+ip address 172.17.200.1 255.255.255.240
+ip nat inside
+ip helper-address 172.17.30.5
+ip helper-address 172.17.30.6
+
+! Avame SSH liinile vty 0 4, teeme kasutaja, crypto key 2048
+
+ip domain-name suvelaager.hkhk.edu.ee
+username Suvelaager secret Passw0rd4795
+crypto key generate rsa modulus 2048
+ip ssh version 2
+ip ssh time-out 60
+ip ssh authentication-retries 2
+line vty 0 4
+login local
+transport input ssh
+
+! Teeme ACL, SSH ligipääs on ainult 192.168.30.0/24 võrgust
+
+ip access-list extended WAN-SSH-BLOCK
+deny tcp any any eq 22
+permit tcp 192.168.30.0 0.0.0.255 any range 2591 2600
+permit ip any any
+interface GigabitEthernet0/1
+ip access-group WAN-SSH-BLOCK in
+
+! Teeme pordisuunamise management vlan’idele
+
+ip nat inside source static tcp 172.17.1.1 22 interface GigabitEthernet0/1 2591
+ip nat inside source static tcp 172.17.1.2 22 interface GigabitEthernet0/1 2592
+ip nat inside source static tcp 172.17.100.2 22 interface GigabitEthernet0/1 2593
+ip nat inside source static tcp 172.17.30.7 22 interface GigabitEthernet0/1 2594
+ip nat inside source static tcp 172.17.30.8 22 interface GigabitEthernet0/1 2595
+ip nat inside source static tcp 172.17.30.9 22 interface GigabitEthernet0/1 2596
+ip nat inside source static tcp 172.17.30.10 22 interface GigabitEthernet0/1 2597
+ip nat inside source static tcp 172.17.30.11 22 interface GigabitEthernet0/1 2598
+ip nat inside source static tcp 172.17.30.12 22 interface GigabitEthernet0/1 2599
+ip nat inside source static tcp 172.17.30.13 22 interface GigabitEthernet0/1 2600
+	
+! Powershell logimine:
+
+! ssh -o KexAlgorithms=+diffie-hellman-group14-sha1 -o HostKeyAlgorithms=+ssh-rsa -o Ciphers=+aes256-cbc -o MACs=+hmac-sha1 Suvelaager@192.168.30.200 -p 2591
+
