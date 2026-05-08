@@ -71,7 +71,7 @@ ip helper-address 172.17.30.6
 ! Avame SSH liinile vty 0 4, teeme kasutaja, crypto key 2048
 
 ip domain-name suvelaager.hkhk.edu.ee
-username Suvelaager secret Passw0rd4795
+username Suvelaager secret password
 crypto key generate rsa modulus 2048
 ip ssh version 2
 ip ssh time-out 60
