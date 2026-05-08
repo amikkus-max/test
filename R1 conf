@@ -12,10 +12,10 @@ config-register 0x2102
 ! Põhiseadistus
 
 no ip domain-lookup
-enable secret Passw0rd4795
+enable secret password
 service password-encryption
 line con 0
-password Passw0rd4795
+password password
 login
 
 ! Määrame WAN IP:
